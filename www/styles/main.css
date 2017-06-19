@@ -1,0 +1,28 @@
+html, body {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  overflow: hidden;
+}
+
+#refresh {
+  width: 44px;
+  height: 44px;
+  position: absolute;
+  left: 50%;
+  top: 0;
+  margin-left: -22px;
+  background-color: rgba(255, 255, 255, 0.2);
+  background-image: url('../assets/refresh.png');
+  background-repeat: no-repeat;
+  background-size: 50%;
+  background-position: center;
+  border-bottom-left-radius: 100%;
+  border-bottom-right-radius: 100%;
+  border: 2px solid #444444;
+  box-sizing: border-box;
+}
