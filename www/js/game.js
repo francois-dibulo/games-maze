@@ -11,42 +11,68 @@ var camera_tween = null;
 var map = null;
 
 var floor_group = null;
-var wall_layer = null;
-var end_group = null;
-var player_group = null;
+var exit_group = null;
+var start_group = null;
 
+var current_level_index = 0;
+
+var input_locked = false;
 var is_touch_down = false;
 var last_tile = null;
+
+var grid = [];
+
+var Tile = {
+  Wall: 0,
+  Floor: 1,
+  Start: 2,
+  Exit: 3
+};
+
+var TILE_SIZE = 50;
 
 function initGame() {
   game = new Phaser.Game(WIDTH, HEIGHT, Phaser.AUTO, 'game-canvas', { preload: preload, create: create, update: update });
 };
 
 function preload() {
-  game.load.tilemap('map', 'assets/levels/level_0.json', null, Phaser.Tilemap.TILED_JSON);
-  game.load.image('wall', 'assets/images/wall.png');
   game.load.image('floor', 'assets/images/floor.png');
   game.load.image('end', 'assets/images/end.png');
-  game.load.image('player', 'assets/images/player.png');
+  game.load.image('start', 'assets/images/player.png');
 }
 
 function create() {
-  map = game.add.tilemap('map');
-  var level_height = map.heightInPixels;
-  game.scale.scaleMode = Phaser.ScaleManager.SHOW_ALL;
-  game.scale.setGameSize(Math.max(map.widthInPixels, WIDTH), Math.max(HEIGHT, map.heightInPixels));
-  game.scale.pageAlignHorizontally = true;
-  game.scale.pageAlignVertically = true;
-  game.scale.parentIsWindow = true;
-  //game.scale.forceOrientation(true, false);
 
-  game.world.setBounds(0, 0, map.widthInPixels, map.heightInPixels);
-
-  game.physics.startSystem(Phaser.Physics.ARCADE);
+  var levels = [
+    [
+      [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+      [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0],
+      [0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0],
+      [0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0],
+      [0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0],
+      [0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0],
+      [0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0],
+      [0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 3, 0, 0, 0],
+      [0, 2, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0],
+      [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+    ],
+    [
+      [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+      [0, 2, 0, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0],
+      [0, 1, 0, 1, 1, 1, 0, 1, 1, 0, 0, 1, 0, 0, 0, 0],
+      [0, 1, 1, 1, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0],
+      [0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 0],
+      [0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 1, 1, 1, 0],
+      [0, 0, 1, 0, 1, 1, 0, 0, 1, 0, 1, 1, 1, 0, 0, 0],
+      [0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 1, 0, 1, 1, 3, 0],
+      [0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 0, 0, 0, 0, 0],
+      [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+    ]
+  ];
 
   function setCustomData(tile) {
-    var col = Math.floor(tile.x / map.tileWidth);
-    var row = Math.floor(tile.y / map.tileHeight);
+    var col = Math.floor(tile.x / TILE_SIZE);
+    var row = Math.floor(tile.y / TILE_SIZE);
     tile.custom = {
       col: col,
       row: row
@@ -56,91 +82,173 @@ function create() {
   function isNeighbor(tile1, tile2) {
     var cells = tile1.custom;
     var other = tile2.custom;
-    return Math.abs(cells.col - other.col) <= 1 && Math.abs(cells.row - other.row) <= 1;
+    var col_distance = Math.abs(cells.col - other.col) <= 1;
+    var row_distance = Math.abs(cells.row - other.row) <= 1;
+
+    var in_distance_c = col_distance && cells.row === other.row;
+    var in_distance_r = row_distance && cells.col === other.col;
+
+    return in_distance_r || in_distance_c;
   }
 
-  map.addTilesetImage('wall');
-  wall_layer = map.createLayer('walls');
+  function createMap(level_index) {
+    var level = levels[current_level_index];
+    var height = level.length * TILE_SIZE;
+    var width = level[0].length * TILE_SIZE;
+    game.scale.scaleMode = Phaser.ScaleManager.SHOW_ALL;
+    game.scale.setGameSize(Math.max(width, WIDTH), Math.max(HEIGHT, height));
+    game.scale.pageAlignHorizontally = true;
+    game.scale.pageAlignVertically = true;
+    game.scale.parentIsWindow = true;
+    //game.scale.forceOrientation(true, false);
 
-  floor_group = game.add.group();
-  map.createFromObjects('floor', 1, 'floor', 0, true, false, floor_group, FloorTile);
+    game.world.setBounds(0, 0, width, height);
+    game.physics.startSystem(Phaser.Physics.ARCADE);
 
-  end_group = game.add.group();
-  map.createFromObjects('end', 4, 'end', 0, true, false, end_group, SafeTile);
+    createGroups(level);
+  }
 
-  player_group = game.add.group();
-  map.createFromObjects('players', 3, 'player', 0, true, false, player_group, Player);
-
-  floor_group.forEach(setCustomData);
-  player_group.forEach(setCustomData);
-  end_group.forEach(setCustomData);
-
-  end_group.onChildInputOver.add(function(safe_tile, point) {
-    if (!last_tile) return;
-    if (isNeighbor(last_tile, safe_tile)) {
-      // Win
-      last_tile = null;
-      console.info("WIN");
-      floor_group.forEach(function(floor) {
-        if (floor.is_selected) {
-          floor.resetScale();
-        }
-      });
-    };
-  });
-
-  player_group.onChildInputDown.add(function(player_tile, point) {
-    //if (!last_tile) {
-      last_tile = player_tile;
-      player_tile.onInputDown();
-      is_touch_down = true;
-    //}
-  });
-
-  player_group.onChildInputUp.add(function(player_tile, point) {
-    is_touch_down = false;
-  });
-
-  floor_group.onChildInputDown.add(function(floor, point) {
-    if (!last_tile) return;
-    if (isNeighbor(last_tile, floor)) {
-      is_touch_down = true;
-      // Only if neighbor form last active floor tile
-      floor.onInputDown();
-      last_tile = floor;
+  function loadNextLevel() {
+    if (current_level_index < levels.length - 1) {
+      current_level_index++;
+      createMap(current_level_index);
     } else {
-      is_touch_down = false;
+      console.warn("This was the last level");
+      current_level_index = 0;
+      createMap(current_level_index);
     }
-  });
+  }
 
-  floor_group.onChildInputOver.add(function(floor, point) {
-    if (is_touch_down) {
-      var in_range = false;
-      if (last_tile) {
-        in_range = isNeighbor(floor, last_tile);
-      }
-      if (in_range) {
-        if (!floor.is_selected) {
-          floor.onInputDown();
-          last_tile = floor;
-        } else if (last_tile && last_tile.renderOrderID !== floor.renderOrderID) {
-          console.warn("DEAD");
-          floor_group.forEach(function(floor) {
-            if (floor.is_selected) {
-              floor.scaleDown();
-            }
-          });
+  function resetGroup(group) {
+    if (group) {
+      group.removeAll(true, true);
+    }
+  }
+
+  function createGroups(level) {
+    resetGroup(floor_group);
+    resetGroup(exit_group);
+    resetGroup(start_group);
+
+    floor_group = game.add.group();
+    exit_group = game.add.group();
+    start_group = game.add.group();
+
+    grid = [];
+
+    for (var r = 0; r < level.length; r++) {
+      var row = level[r];
+      grid.push([]);
+
+      for (var c = 0; c < row.length; c++) {
+        var col = row[c];
+
+        var x = TILE_SIZE * c;
+        var y = TILE_SIZE * r;
+
+        var grid_tile = Tile.Wall;
+
+        if (col === Tile.Floor) {
+          var tile = new FloorTile(game, x, y, 'floor', 0);
+          setCustomData(tile);
+          floor_group.addChild(tile);
+          grid_tile = Tile.Floor;
         }
-      } else {
 
+        if (col === Tile.Exit) {
+          var tile = new SafeTile(game, x, y, 'end', 0);
+          setCustomData(tile);
+          exit_group.addChild(tile);
+          grid_tile = Tile.Exit;
+        }
+
+        if (col === Tile.Start) {
+          var tile = new StartTile(game, x, y, 'start', 0);
+          setCustomData(tile);
+          start_group.addChild(tile);
+          grid_tile = Tile.Start;
+        }
+
+        if (grid[r] === undefined) {
+          grid[r] = [];
+        }
+        grid[r].push(grid_tile);
       }
     }
-  });
 
-  floor_group.onChildInputUp.add(function(floor, point) {
-    is_touch_down = false;
-  });
+    exit_group.onChildInputOver.add(function(safe_tile, point) {
+      if (!last_tile) return;
+      if (isNeighbor(last_tile, safe_tile)) {
+        // Win
+        last_tile = null;
+        console.info("WIN");
+        floor_group.forEach(function(floor) {
+          if (floor.is_selected) {
+            floor.resetScale();
+          }
+        });
+        loadNextLevel();
+      };
+    });
 
+    start_group.onChildInputDown.add(function(start_tile, point) {
+      //if (!last_tile) {
+        last_tile = start_tile;
+        start_tile.onInputDown();
+        is_touch_down = true;
+      //}
+    });
+
+    start_group.onChildInputUp.add(function(start_tile, point) {
+      is_touch_down = false;
+    });
+
+    floor_group.onChildInputDown.add(function(floor, point) {
+      if (!last_tile || input_locked) return;
+      if (isNeighbor(last_tile, floor)) {
+        is_touch_down = true;
+        // Only if neighbor form last active floor tile
+        floor.onInputDown();
+        last_tile = floor;
+      } else {
+        is_touch_down = false;
+      }
+    });
+
+    floor_group.onChildInputOver.add(function(floor, point) {
+      if (is_touch_down && !input_locked) {
+        var in_range = false;
+        if (last_tile) {
+          in_range = isNeighbor(floor, last_tile);
+        }
+        if (in_range) {
+          if (!floor.is_selected) {
+            floor.onInputDown();
+            last_tile = floor;
+          } else if (last_tile && last_tile.renderOrderID !== floor.renderOrderID) {
+            console.warn("DEAD");
+            input_locked = true;
+            floor_group.forEach(function(floor) {
+              if (floor.is_selected) {
+                floor.scaleDown();
+              }
+            });
+            game.time.events.add(Phaser.Timer.SECOND * 2, function() {
+              input_locked = false;
+            }, this);
+          }
+        } else {
+
+        }
+      }
+    });
+
+    floor_group.onChildInputUp.add(function(floor, point) {
+      is_touch_down = false;
+    });
+  }
+
+  createMap(0);
 }
 
 function update() {
