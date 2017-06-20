@@ -8,10 +8,13 @@ var camera_point = null;
 var camera_speed = 10;
 var camera_tween = null;
 
+var map = null;
+
 var floor_group = null;
 var wall_layer = null;
 var end_group = null;
 var player_group = null;
+var start_tile = null;
 
 var is_touch_down = false;
 
@@ -28,7 +31,7 @@ function preload() {
 }
 
 function create() {
-  var map = game.add.tilemap('map');
+  map = game.add.tilemap('map');
   var level_height = map.heightInPixels;
   game.scale.scaleMode = Phaser.ScaleManager.SHOW_ALL;
   game.scale.setGameSize(Math.max(map.widthInPixels, WIDTH), Math.max(HEIGHT, map.heightInPixels));
@@ -47,29 +50,88 @@ function create() {
   floor_group = game.add.group();
   map.createFromObjects('floor', 1, 'floor', 0, true, false, floor_group, FloorTile);
 
+  floor_group.forEach(function(floor) {
+    var col = Math.floor(floor.x / map.tileWidth);
+    var row = Math.floor(floor.y / map.tileHeight);
+    floor.custom = {
+      col: col,
+      row: row
+    };
+  });
+
   end_group = game.add.group();
   map.createFromObjects('end', 4, 'end', 0, true, false, end_group, SafeTile);
 
   player_group = game.add.group();
   map.createFromObjects('players', 3, 'player', 0, true, false, player_group, Player);
+  start_tile = player_group.children[0];
 
-  var last_tile_id = null;
+  var last_tile = null;
+
+  function isNeighbor(tile1, tile2) {
+    var cells = tile1.custom;
+    var other = tile2.custom;
+    return Math.abs(cells.col - other.col) <= 1 && Math.abs(cells.row - other.row) <= 1;
+  }
+
+  end_group.onChildInputOver.add(function(safe_tile, point) {
+    if (!last_tile) return;
+    if (isNeighbor(last_tile, safe_tile)) {
+      // Win
+      last_tile = null;
+      console.info("WIN");
+      floor_group.forEach(function(floor) {
+        if (floor.is_selected) {
+          floor.resetScale();
+        }
+      });
+    };
+  });
+
+  player_group.onChildInputDown.add(function(player_tile, point) {
+    //if (!last_tile) {
+      last_tile = player_tile;
+      player_tile.onInputDown();
+      is_touch_down = true;
+    //}
+  });
+
+  player_group.onChildInputUp.add(function(player_tile, point) {
+    is_touch_down = false;
+  });
 
   floor_group.onChildInputDown.add(function(floor, point) {
-    is_touch_down = true;
-    // Only if neighbor form last active floor tile
-    floor.onInputDown();
-    last_tile_id = floor.renderOrderID;
+    if (!last_tile) return;
+    if (isNeighbor(last_tile, floor)) {
+      is_touch_down = true;
+      // Only if neighbor form last active floor tile
+      floor.onInputDown();
+      last_tile = floor;
+    } else {
+      is_touch_down = false;
+    }
   });
 
   floor_group.onChildInputOver.add(function(floor, point) {
     if (is_touch_down) {
-      // Check if neighbor
-      if (!floor.is_selected) {
-        floor.onInputDown();
-        last_tile_id = floor.renderOrderID;
-      } else if (last_tile_id !== floor.renderOrderID) {
-        console.warn("DEAD");
+      var in_range = false;
+      if (last_tile) {
+        in_range = isNeighbor(floor, last_tile);
+      }
+      if (in_range) {
+        if (!floor.is_selected) {
+          floor.onInputDown();
+          last_tile = floor;
+        } else if (last_tile && last_tile.renderOrderID !== floor.renderOrderID) {
+          console.warn("DEAD");
+          floor_group.forEach(function(floor) {
+            if (floor.is_selected) {
+              floor.scaleDown();
+            }
+          });
+        }
+      } else {
+
       }
     }
   });
@@ -83,65 +145,8 @@ function create() {
     //is_touch_down = false;
   });
 
-  // var camera_point_graphic = game.add.graphics(0, 0);
-  // camera_point_graphic.beginFill(0x00FF00, 1);
-  // camera_point_graphic.drawCircle(0, 0, 10);
-  // camera_point = game.add.sprite(game.width / 2, game.height / 2, camera_point_graphic.generateTexture());
-  // camera_point.anchor.set(0.5);
-  // camera_point_graphic.destroy();
-
-  // var prev_tween = null;
-  // wp_group.forEach(function(waypoint) {
-  //   var x = waypoint.centerX;
-  //   var y = waypoint.centerY;
-  //   if (!prev_tween) {
-  //     prev_tween = game.add.tween(camera_point).to({ x: x, y: y }, 5000);
-  //     camera_tween = prev_tween;
-  //   } else {
-  //     var tween = game.add.tween(camera_point).to({ x: x, y: y }, 5000);
-  //     prev_tween.chain(tween);
-  //     prev_tween = tween;
-  //   }
-  // });
-  // camera_tween.start();
-  // game.camera.follow(camera_point);
-
-  // flash = new Flash(game);
-  // wall_group.onChildInputDown.add(function(wall, point) {
-  //   if (!wall.isTouchable()) return;
-  //   flash.push(wall);
-  //   if (flash.isLimit()) {
-  //     flash.init();
-  //   }
-  // }, this);
-
-  // enemy_group.forEach(function(enemy) {
-  //   enemy.setTargetObj(camera_point);
-  // });
 }
 
 function update() {
   var collide = game.physics.arcade.collide.bind(game.physics.arcade);
-  collide(player_group, wall_layer);
-
-
-  return;
-  collide(enemy_group, enemy_group);
-  collide(enemy_group, wall_group);
-
-  if (flash.is_active) {
-    var polygon = flash.intersection_polygon;
-
-    // Collision Flash and Enemy
-    if (enemy_group && polygon) {
-      enemy_group.forEach(function(enemy) {
-        var is_hit = polygon.contains(enemy.centerX, enemy.centerY);
-        if (is_hit) {
-          enemy.onHit();
-        }
-      });
-    }
-
-  }
-
 }
