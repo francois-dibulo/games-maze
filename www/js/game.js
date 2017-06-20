@@ -14,9 +14,9 @@ var floor_group = null;
 var wall_layer = null;
 var end_group = null;
 var player_group = null;
-var start_tile = null;
 
 var is_touch_down = false;
+var last_tile = null;
 
 function initGame() {
   game = new Phaser.Game(WIDTH, HEIGHT, Phaser.AUTO, 'game-canvas', { preload: preload, create: create, update: update });
@@ -44,35 +44,36 @@ function create() {
 
   game.physics.startSystem(Phaser.Physics.ARCADE);
 
-  map.addTilesetImage('wall');
-  wall_layer = map.createLayer('walls');
-
-  floor_group = game.add.group();
-  map.createFromObjects('floor', 1, 'floor', 0, true, false, floor_group, FloorTile);
-
-  floor_group.forEach(function(floor) {
-    var col = Math.floor(floor.x / map.tileWidth);
-    var row = Math.floor(floor.y / map.tileHeight);
-    floor.custom = {
+  function setCustomData(tile) {
+    var col = Math.floor(tile.x / map.tileWidth);
+    var row = Math.floor(tile.y / map.tileHeight);
+    tile.custom = {
       col: col,
       row: row
     };
-  });
-
-  end_group = game.add.group();
-  map.createFromObjects('end', 4, 'end', 0, true, false, end_group, SafeTile);
-
-  player_group = game.add.group();
-  map.createFromObjects('players', 3, 'player', 0, true, false, player_group, Player);
-  start_tile = player_group.children[0];
-
-  var last_tile = null;
+  }
 
   function isNeighbor(tile1, tile2) {
     var cells = tile1.custom;
     var other = tile2.custom;
     return Math.abs(cells.col - other.col) <= 1 && Math.abs(cells.row - other.row) <= 1;
   }
+
+  map.addTilesetImage('wall');
+  wall_layer = map.createLayer('walls');
+
+  floor_group = game.add.group();
+  map.createFromObjects('floor', 1, 'floor', 0, true, false, floor_group, FloorTile);
+
+  end_group = game.add.group();
+  map.createFromObjects('end', 4, 'end', 0, true, false, end_group, SafeTile);
+
+  player_group = game.add.group();
+  map.createFromObjects('players', 3, 'player', 0, true, false, player_group, Player);
+
+  floor_group.forEach(setCustomData);
+  player_group.forEach(setCustomData);
+  end_group.forEach(setCustomData);
 
   end_group.onChildInputOver.add(function(safe_tile, point) {
     if (!last_tile) return;
@@ -138,11 +139,6 @@ function create() {
 
   floor_group.onChildInputUp.add(function(floor, point) {
     is_touch_down = false;
-  });
-
-  floor_group.onChildInputOut.add(function(floor, point) {
-    //console.log(game.input);
-    //is_touch_down = false;
   });
 
 }

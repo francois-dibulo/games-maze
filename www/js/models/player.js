@@ -3,11 +3,7 @@ var Player = function (game, x, y, key, frame) {
   this.game = game;
   this.is_selected = false;
   this.inputEnabled = true;
-  this.custom = {
-    col: Math.floor(x / 50),
-    row: Math.floor(y / 50)
-  };
-  //this.events.onInputDown.add(this.onInputDown, this);
+  this.custom = {};
 }
 
 Player.prototype = Object.create(Phaser.Sprite.prototype);

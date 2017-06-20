@@ -17,7 +17,7 @@
        under the License.
  */
 
-package com.zeuz.maze;
+package com.zeus.maze;
 
 import android.os.Bundle;
 import org.apache.cordova.*;

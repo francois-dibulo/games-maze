@@ -3,13 +3,10 @@ var FloorTile = function (game, x, y, key, frame) {
   this.game = game;
   this.custom = {};
   this.inputEnabled = true;
-  //this.events.onInputDown.add(this.onInputDown, this);
-  //this.events.onInputOver.add(this.onInputDown, this);
   this.pivot.x = this.width / 2;
   this.pivot.y = this.height / 2;
   this.x += this.width / 2;
   this.y += this.height / 2;
-  //this.anchor.setTo(0.5, 0.5);
   this.is_selected = false;
 
 }
