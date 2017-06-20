@@ -53,16 +53,24 @@ function create() {
   player_group = game.add.group();
   map.createFromObjects('players', 3, 'player', 0, true, false, player_group, Player);
 
+  var last_tile_id = null;
+
   floor_group.onChildInputDown.add(function(floor, point) {
     is_touch_down = true;
     // Only if neighbor form last active floor tile
     floor.onInputDown();
+    last_tile_id = floor.renderOrderID;
   });
 
   floor_group.onChildInputOver.add(function(floor, point) {
     if (is_touch_down) {
-      // Only if neighbor
-      floor.onInputDown();
+      // Check if neighbor
+      if (!floor.is_selected) {
+        floor.onInputDown();
+        last_tile_id = floor.renderOrderID;
+      } else if (last_tile_id !== floor.renderOrderID) {
+        console.warn("DEAD");
+      }
     }
   });
 
@@ -71,7 +79,7 @@ function create() {
   });
 
   floor_group.onChildInputOut.add(function(floor, point) {
-    console.log(game.input);
+    //console.log(game.input);
     //is_touch_down = false;
   });
 
