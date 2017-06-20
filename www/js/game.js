@@ -119,6 +119,26 @@ function create() {
     }
   }
 
+  function resetLevel() {
+    console.warn("DEAD");
+    input_locked = true;
+
+    floor_group.forEach(function(floor) {
+      if (floor.is_selected) {
+        floor.scaleDown();
+      }
+    });
+
+    game.time.events.add(Phaser.Timer.SECOND * 2, function() {
+      floor_group.forEach(function(floor) {
+        if (floor.is_selected) {
+          floor.resetScale();
+        }
+      });
+      input_locked = false;
+    }, this);
+  }
+
   function resetGroup(group) {
     if (group) {
       group.removeAll(true, true);
@@ -192,11 +212,16 @@ function create() {
     });
 
     start_group.onChildInputDown.add(function(start_tile, point) {
-      //if (!last_tile) {
+      if (!last_tile) {
         last_tile = start_tile;
         start_tile.onInputDown();
         is_touch_down = true;
-      //}
+      } else {
+        start_tile.is_selected = false;
+        last_tile = null;
+        is_touch_down = false;
+        resetLevel();
+      }
     });
 
     start_group.onChildInputUp.add(function(start_tile, point) {
@@ -226,16 +251,7 @@ function create() {
             floor.onInputDown();
             last_tile = floor;
           } else if (last_tile && last_tile.renderOrderID !== floor.renderOrderID) {
-            console.warn("DEAD");
-            input_locked = true;
-            floor_group.forEach(function(floor) {
-              if (floor.is_selected) {
-                floor.scaleDown();
-              }
-            });
-            game.time.events.add(Phaser.Timer.SECOND * 2, function() {
-              input_locked = false;
-            }, this);
+            resetLevel();
           }
         } else {
 

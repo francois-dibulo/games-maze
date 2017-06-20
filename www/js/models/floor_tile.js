@@ -26,12 +26,12 @@ FloorTile.prototype.setActiveStyle = function (state) {
 FloorTile.prototype.onInputDown = function (sprite, point) {
   if (!this.is_selected) {
     this.setActiveStyle(true);
+    //this.scaleDown();
   }
 };
 
 FloorTile.prototype.scaleDown = function () {
   this.game.add.tween(this.scale).to( { x: 0, y: 0 }, 800, Phaser.Easing.Linear.None, true);
-  this.game.time.events.add(Phaser.Timer.SECOND * 2, this.resetScale, this);
 };
 
 FloorTile.prototype.resetScale = function () {
