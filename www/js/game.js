@@ -33,6 +33,7 @@ var TILE_SIZE = 50;
 
 function initGame() {
   game = new Phaser.Game(WIDTH, HEIGHT, Phaser.AUTO, 'game-canvas', { preload: preload, create: create, update: update });
+  Timer.init();
 };
 
 function preload() {
@@ -106,6 +107,8 @@ function create() {
     game.physics.startSystem(Phaser.Physics.ARCADE);
 
     createGroups(level);
+    Timer.reset();
+    Timer.start();
   }
 
   function loadNextLevel() {
@@ -120,6 +123,7 @@ function create() {
   }
 
   function resetLevel() {
+    Timer.stop();
     console.warn("DEAD");
     input_locked = true;
 
