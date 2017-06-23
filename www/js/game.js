@@ -13,6 +13,7 @@ var map = null;
 var floor_group = null;
 var exit_group = null;
 var start_group = null;
+var wall_group = null;
 
 var current_level_index = 0;
 
@@ -29,6 +30,23 @@ var Tile = {
   Exit: 3
 };
 
+var cursors = null;
+var player_tile = null;
+var Direction = {
+  Up: 'up',
+  Right: 'right',
+  Down: 'down',
+  Left: 'left'
+};
+var move_direction = null;
+var target_tile = null;
+var lock_swipe = false;
+var Config = {
+  Tile_Size: 0,
+  Rows: 29,
+  Cols: 19
+};
+
 var TILE_SIZE = 50;
 
 function initGame() {
@@ -38,41 +56,42 @@ function initGame() {
 function preload() {
   game.load.image('floor', 'assets/images/floor.png');
   game.load.image('end', 'assets/images/end.png');
+  game.load.image('wall', 'assets/images/wall.png');
   game.load.image('start', 'assets/images/player.png');
 }
 
 function create() {
+  cursors = game.input.keyboard.createCursorKeys();
+  // var levels = [
+  //   [
+  //     [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+  //     [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0],
+  //     [0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0],
+  //     [0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0],
+  //     [0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 0],
+  //     [0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0, 1, 0],
+  //     [0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0, 1, 0],
+  //     [0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 1, 1, 0, 3, 0],
+  //     [0, 2, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 1, 1, 0, 0],
+  //     [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+  //   ],
+  //   [
+  //     [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+  //     [0, 2, 0, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0],
+  //     [0, 1, 0, 1, 1, 1, 0, 1, 1, 0, 0, 1, 0, 0, 0, 0],
+  //     [0, 1, 1, 1, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0],
+  //     [0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 0],
+  //     [0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 1, 1, 1, 0],
+  //     [0, 0, 1, 0, 1, 1, 0, 0, 1, 0, 1, 1, 1, 0, 0, 0],
+  //     [0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 1, 0, 1, 1, 3, 0],
+  //     [0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 0, 0, 0, 0, 0],
+  //     [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+  //   ]
+  // ];
 
-  var levels = [
-    [
-      [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-      [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0],
-      [0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0],
-      [0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0],
-      [0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0],
-      [0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0],
-      [0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0],
-      [0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 3, 0, 0, 0],
-      [0, 2, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0],
-      [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-    ],
-    [
-      [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-      [0, 2, 0, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0],
-      [0, 1, 0, 1, 1, 1, 0, 1, 1, 0, 0, 1, 0, 0, 0, 0],
-      [0, 1, 1, 1, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0],
-      [0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 0],
-      [0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 1, 1, 1, 0],
-      [0, 0, 1, 0, 1, 1, 0, 0, 1, 0, 1, 1, 1, 0, 0, 0],
-      [0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 1, 0, 1, 1, 3, 0],
-      [0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 0, 0, 0, 0, 0],
-      [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-    ]
-  ];
-
-  function setCustomData(tile) {
-    var col = Math.floor(tile.x / TILE_SIZE);
-    var row = Math.floor(tile.y / TILE_SIZE);
+  function setCustomData(tile, tile_size) {
+    var col = Math.floor(tile.x / tile_size);
+    var row = Math.floor(tile.y / tile_size);
     tile.custom = {
       col: col,
       row: row
@@ -89,6 +108,73 @@ function create() {
     var in_distance_r = row_distance && cells.col === other.col;
 
     return in_distance_r || in_distance_c;
+  }
+
+  function renderMaze() {
+    resetGroup(floor_group);
+    resetGroup(exit_group);
+    resetGroup(start_group);
+    resetGroup(wall_group);
+
+    floor_group = game.add.group();
+    exit_group = game.add.group();
+    start_group = game.add.group();
+    wall_group = game.add.group();
+
+    var rows = Config.Rows;
+    var cols = Config.Cols;
+    grid = [];
+    var maze = new Maze(rows, cols);
+    var tile_size = Math.min(Math.floor(WIDTH / rows), Math.floor(HEIGHT / cols));
+    Config.Tile_Size = tile_size;
+
+    for (var x = 0; x < maze.maze.length; x++) {
+      grid.push([]);
+      for (var y = 0; y < maze.maze[x].length; y++) {
+        var type = maze.maze[x][y].type.value;
+        var pos_x = maze.maze[x][y].x * tile_size;
+        var pos_y = maze.maze[x][y].y * tile_size;
+
+        if (type === Tile.Floor) {
+          var tile = new FloorTile(game, pos_x, pos_y, 'floor', 0);
+          tile.width = tile_size;
+          tile.height = tile_size;
+          setCustomData(tile, tile_size);
+          floor_group.addChild(tile);
+        }
+
+        if (type === Tile.Wall) {
+          var tile = new WallTile(game, pos_x, pos_y, 'wall', 0);
+          tile.width = tile_size;
+          tile.height = tile_size;
+          setCustomData(tile, tile_size);
+          wall_group.addChild(tile);
+        }
+
+        if (grid[x] === undefined) {
+          grid[x] = [];
+        }
+        grid[x].push(type);
+      }
+    }
+
+    //console.log(grid);
+
+    var safe_tile = maze.mazeEnd;
+    var tile = new SafeTile(game, safe_tile.x * tile_size, safe_tile.y * tile_size, 'end', 0);
+    tile.width = tile_size;
+    tile.height = tile_size;
+    setCustomData(tile, tile_size);
+    exit_group.addChild(tile);
+
+    var start_tile = maze.mazeStart;
+    player_tile = new StartTile(game, start_tile.x * tile_size, start_tile.y * tile_size, 'start', 0);
+    player_tile.width = tile_size;
+    player_tile.height = tile_size;
+    setCustomData(player_tile, tile_size);
+    // game.physics.enable(player_tile, Phaser.Physics.ARCADE);
+    start_group.addChild(player_tile);
+    console.log(player_tile);
   }
 
   function createMap(level_index) {
@@ -264,7 +350,89 @@ function create() {
     });
   }
 
-  createMap(0);
+  function getTargetTile(move_direction) {
+    var current_col = player_tile.custom.col;
+    var current_row = player_tile.custom.row;
+    var c = current_col;
+    var r = current_row;
+    if (move_direction === Direction.Up) {
+      while(grid[c][r] !== Tile.Wall) {
+        r--;
+        if (grid[c + 1][r] === Tile.Floor || grid[c - 1][r] === Tile.Floor) {
+          r--;
+          break;
+        }
+        if (r === 0) {
+          break;
+        }
+      }
+      r++;
+      console.log(r, c);
+    } else if (move_direction === Direction.Down) {
+      while(grid[c][r] !== Tile.Wall) {
+        r++;
+        if (grid[c + 1][r] === Tile.Floor || grid[c - 1][r] === Tile.Floor) {
+          r++;
+          break;
+        }
+        if (r === Config.Rows) {
+          break;
+        }
+      }
+      r--;
+    } else if (move_direction === Direction.Left) {
+      while(grid[c][r] !== Tile.Wall) {
+        c--;
+        if (grid[c][r + 1] === Tile.Floor || grid[c][r - 1] === Tile.Floor) {
+          c--;
+          break;
+        }
+        if (c === 0) break;
+      }
+      c++;
+    } else if (move_direction === Direction.Right) {
+      while(grid[c][r] !== Tile.Wall) {
+        c++;
+        if (grid[c][r + 1] === Tile.Floor || grid[c][r - 1] === Tile.Floor) {
+          c++;
+          break;
+        }
+        if (c === Config.Cols) break;
+      }
+      c--;
+    }
+
+    var target_pos = {
+      x: c * Config.Tile_Size,
+      y: r * Config.Tile_Size
+    };
+    var tween = game.add.tween(player_tile).to(target_pos, 200, Phaser.Easing.Bounce.Out, true);
+    tween.onComplete.add(function() {
+      setCustomData(player_tile, Config.Tile_Size);
+      lock_swipe = false;
+    });
+  }
+
+  function movePlayer(move_direction) {
+    var target_candidate = getTargetTile(move_direction);
+  }
+
+  var swipe_area = new SwipeDigital("swipe-area", {
+    onTrigger: function(direction_map) {
+      if (lock_swipe) return;
+      for (var direction in direction_map) {
+        if (direction_map[direction] === true) {
+          lock_swipe = true;
+          move_direction = direction;
+          console.log(move_direction);
+          movePlayer(move_direction);
+        }
+      }
+    }
+  });
+
+  //createMap(0);
+  renderMaze();
 }
 
 function update() {
