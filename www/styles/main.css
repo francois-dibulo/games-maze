@@ -40,10 +40,10 @@ body {
 
 #time {
   position: absolute;
-  bottom: 0.5vw;
-  right: 1vw;
+  bottom: 0.2vw;
+  right: 1.8vw;
   pointer-events: none;
   color: #FFFFFF;
-  font-size: 7vh;
-  color: #923892;
+  font-size: 5vh;
+  color: #FFFFFF;
 }

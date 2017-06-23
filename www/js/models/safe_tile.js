@@ -3,6 +3,7 @@ var SafeTile = function (game, x, y, key, frame) {
   this.game = game;
   this.inputEnabled = true;
   this.custom = {};
+  game.physics.enable(this, Phaser.Physics.ARCADE);
 }
 
 SafeTile.prototype = Object.create(Phaser.Sprite.prototype);
