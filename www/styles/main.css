@@ -47,3 +47,13 @@ body {
   font-size: 5vh;
   color: #FFFFFF;
 }
+
+#level {
+  position: absolute;
+  bottom: 0.2vw;
+  left: 1.8vw;
+  pointer-events: none;
+  color: #FFFFFF;
+  font-size: 5vh;
+  color: #FFFFFF;
+}

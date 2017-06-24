@@ -20,7 +20,8 @@ var Config = {
   Tile_Size: 0,
   Rows: 19,
   Cols: 11,
-  MAX_ROWS: 51
+  MAX_ROWS: 51,
+  level: 1
 };
 
 var grid = [];
@@ -34,6 +35,11 @@ var player_tile = null;
 var safe_tile = null;
 
 var lock_swipe = false;
+
+function updateLevel() {
+  var ele = document.getElementById('level');
+  ele.innerHTML = "LVL " + Config.level;
+}
 
 function initGame() {
   game = new Phaser.Game(WIDTH, HEIGHT, Phaser.AUTO, 'game-canvas', { preload: preload, create: create, update: update });
@@ -137,6 +143,7 @@ function create() {
 
     Timer.reset();
     Timer.start();
+    updateLevel();
   }
 
   function loadNextLevel() {
@@ -145,6 +152,7 @@ function create() {
       Config.Rows += 2;
       Config.Cols += 2;
     }
+    Config.level++;
     renderMaze();
   }
 
