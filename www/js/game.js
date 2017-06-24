@@ -19,7 +19,8 @@ var Tile = {
 var Config = {
   Tile_Size: 0,
   Rows: 19,
-  Cols: 11
+  Cols: 11,
+  MAX_ROWS: 51
 };
 
 var grid = [];
@@ -140,8 +141,10 @@ function create() {
 
   function loadNextLevel() {
     lock_swipe = false;
-    Config.Rows += 2;
-    Config.Cols += 2;
+    if (Config.Rows < Config.MAX_ROWS) {
+      Config.Rows += 2;
+      Config.Cols += 2;
+    }
     renderMaze();
   }
 
@@ -179,15 +182,16 @@ function create() {
       }
     } else if (move_direction === Direction.Down) {
       while(grid[c][r] !== Tile.Wall) {
+        if (!grid[c]) break;
+        if (r === Config.Cols - 1) {
+          break;
+        }
         r++;
         if (grid[c + 1][r] === Tile.Floor || grid[c - 1][r] === Tile.Floor) {
           break;
         }
-        if (r === Config.Rows) {
-          break;
-        }
       }
-      if (grid[c][r] === Tile.Wall) {
+      if (grid[c] && grid[c][r] === Tile.Wall) {
         r--;
       }
     } else if (move_direction === Direction.Left) {
@@ -203,13 +207,17 @@ function create() {
       }
     } else if (move_direction === Direction.Right) {
       while(grid[c][r] !== Tile.Wall) {
+        if (!grid[c]) break;
+        if (c === Config.Rows - 1) break;
         c++;
+        if (grid[c][r] === Tile.Exit) {
+          break;
+        }
         if (grid[c][r + 1] === Tile.Floor || grid[c][r - 1] === Tile.Floor) {
           break;
         }
-        if (c === Config.Cols) break;
       }
-      if (grid[c][r] === Tile.Wall) {
+      if (grid[c] && grid[c][r] === Tile.Wall) {
         c--;
       }
     }

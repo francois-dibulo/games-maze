@@ -18,6 +18,7 @@ var Timer = {
     this.is_running = false;
   },
   loop: function() {
+    if (!this.is_running) return;
     var now = +(new Date());
     var delta = now - this.start_ts;
 
