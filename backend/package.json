@@ -1,0 +1,16 @@
+{
+  "name": "maze-be",
+  "version": "1.0.0",
+  "description": "Backend for maze game",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "author": "Francois Weber",
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.15.2",
+    "socket.io": "^1.7.3"
+  }
+}
