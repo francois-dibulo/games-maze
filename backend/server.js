@@ -4,6 +4,7 @@ var server = require('http').Server(app);
 var io = require('socket.io').listen(server);
 Player = require('./js/models/player');
 Room = require('./js/models/room');
+Maze = require('./js/models/maze_generator');
 
 app.use('/css',express.static(__dirname + '/css'));
 app.use('/js',express.static(__dirname + '/js'));
@@ -67,7 +68,7 @@ function getMatchingOpponents(player_id, limit) {
 
 function createRoom() {
   var id = guid();
-  var room = new Room();
+  var room = new Room(id, io);
   rooms[id] = room;
   return room;
 }
@@ -115,10 +116,21 @@ io.on('connection', function(socket) {
       p.setState(Player.State.Ingame);
     }
 
+    var rows = 19;
+    var cols = 11;
+    var maze = new Maze(rows, cols);
+
     room.broadcast({
       view: 'game',
       opponents: client_opponents,
-      room_id: room.id
+      room_id: room.id,
+      maze: {
+        rows: rows,
+        cols: cols,
+        maze: maze.maze,
+        mazeEnd: maze.mazeEnd,
+        mazeStart: maze.mazeStart,
+      }
     });
 
   });

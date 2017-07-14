@@ -1,24 +1,43 @@
-function joinGame(e) {
-  var username = username_btn.value;
+function joinGame(username) {
   if (username) {
     Client.setUsername(username);
   }
-  e.preventDefault();
 }
 
-var join_btn = document.getElementById('join_btn');
-var username_btn = document.getElementById('username');
+// Post up to cordova app
+function postApp(message) {
+  window.parent.postMessage(message, "*");
+}
+
+// Bind events from Cordova app
+window.addEventListener('message',function(event) {
+  var data = event.data;
+
+  if (data) {
+    if (data.set_username) {
+      joinGame(data.username);
+    }
+  }
+
+});
 
 window.onload = function() {
-  join_btn.addEventListener('click', joinGame);
-  VM.show('main');
+  postApp({
+    state: 'connected'
+  });
 }
 
 Client.onUsernameSet = function() {
-  VM.show('connect');
   Client.send('find_game');
+  postApp({
+    state: 'matching'
+  });
 };
 
 Client.onGameStart = function(data) {
-  VM.show('game');
+  postApp({
+    state: 'ingame',
+    game_data: data
+  });
 };
+

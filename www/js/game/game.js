@@ -1,3 +1,5 @@
+var Game = function(maze_opts) {
+
 var WIDTH = window.innerWidth;
 var HEIGHT = window.innerHeight;
 var game = null;
@@ -18,8 +20,8 @@ var Tile = {
 
 var Config = {
   Tile_Size: 0,
-  Rows: 19,
-  Cols: 11,
+  Rows: maze_opts ? maze_opts.rows : 19,
+  Cols: maze_opts ? maze_opts.cols : 11,
   MAX_ROWS: 51,
   level: 1
 };
@@ -79,7 +81,7 @@ function create() {
     var rows = Config.Rows;
     var cols = Config.Cols;
     grid = [];
-    var maze = new Maze(rows, cols);
+    var maze = maze_opts || new Maze(rows, cols);
     var tile_size = Math.min(Math.floor(WIDTH / rows), Math.floor(HEIGHT / cols));
     Config.Tile_Size = tile_size;
 
@@ -265,5 +267,8 @@ function create() {
   renderMaze();
 }
 
-function update() {
-}
+function update() {}
+
+initGame();
+
+};

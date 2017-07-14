@@ -1,0 +1,27 @@
+Remote Game
+
+{{ state }}
+
+<div ng-switch="state">
+
+  <div ng-switch-when="connected">
+    Username:
+    <input type="text" id="username" value="cheeky" ng-model="player.username">
+    <button type="button" id="join_btn" ng-click="joinGame()">Join</button>
+  </div>
+
+  <div ng-switch-when="matching">
+    Looking for a match ...
+  </div>
+
+  <div ng-switch-when="matching">
+    Ingame
+  </div>
+
+  <div ng-switch-default>
+    Connecting to servers
+  </div>
+
+</div>
+
+<iframe src="" id="backend-frame" height="0" width="0" frameborder="0"></iframe>

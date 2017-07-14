@@ -1,5 +1,14 @@
-body {
+html, body {
+  height: 100%;
+}
 
+body {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  overflow: hidden;
+  background: #000000;
+  font-family: 'Exo', sans-serif;
 }
 
 .view {

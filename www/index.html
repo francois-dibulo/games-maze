@@ -28,7 +28,7 @@
             * Disables use of inline scripts in order to mitigate risk of XSS vulnerabilities. To change this:
                 * Enable inline JS: add 'unsafe-inline' to default-src
         -->
-        <meta http-equiv="Content-Security-Policy" content="default-src 'self' data: gap: https://ssl.gstatic.com 'unsafe-eval'; style-src 'self' 'unsafe-inline'; media-src *; img-src 'self' data: content:;">
+        <meta http-equiv="Content-Security-Policy" content="default-src * data: gap: https://ssl.gstatic.com 'unsafe-eval'; style-src 'self' 'unsafe-inline'; media-src *; img-src 'self' data: content:;">
         <meta name="format-detection" content="telephone=no">
         <meta name="msapplication-tap-highlight" content="no">
         <meta name="viewport" content="user-scalable=no, initial-scale=1, maximum-scale=1, minimum-scale=1, width=device-width">
@@ -36,22 +36,26 @@
         <link rel="stylesheet" type="text/css" href="styles/main.css">
         <title></title>
     </head>
-    <body>
-        <div id="game-canvas"></div>
-        <div id="swipe-area"></div>
-        <div id="level"></div>
-        <div id="time"></div>
-        <div id="refresh"></div>
+    <body ng-app="app">
+        <div ng-controller="MainCtrl" ng-init="init()" ng-view></div>
+
         <script type="text/javascript" src="cordova.js"></script>
-        <script type="text/javascript" src="js/libs/swipe-digital.js"></script>
-        <script type="text/javascript" src="js/libs/phaser.min.js"></script>
-        <script type="text/javascript" src="js/models/maze_generator.js"></script>
-        <script type="text/javascript" src="js/models/wall_tile.js"></script>
-        <script type="text/javascript" src="js/models/timer.js"></script>
-        <script type="text/javascript" src="js/models/start_tile.js"></script>
-        <script type="text/javascript" src="js/models/safe_tile.js"></script>
-        <script type="text/javascript" src="js/models/floor_tile.js"></script>
-        <script type="text/javascript" src="js/game.js"></script>
-        <script type="text/javascript" src="js/app.js"></script>
+        <script type="text/javascript" src="js/app/libs/angular.js"></script>
+        <script type="text/javascript" src="js/app/libs/angular.route.min.js"></script>
+        <!-- APP -->
+        <script type="text/javascript" src="js/app/ng_app.js"></script>
+        <script type="text/javascript" src="js/app/ctrl/main.js"></script>
+        <script type="text/javascript" src="js/app/ctrl/game.js"></script>
+        <!-- GAME -->
+        <script type="text/javascript" src="js/game/libs/swipe-digital.js"></script>
+        <script type="text/javascript" src="js/game/libs/phaser.min.js"></script>
+        <script type="text/javascript" src="js/game/models/maze_generator.js"></script>
+        <script type="text/javascript" src="js/game/models/wall_tile.js"></script>
+        <script type="text/javascript" src="js/game/models/timer.js"></script>
+        <script type="text/javascript" src="js/game/models/start_tile.js"></script>
+        <script type="text/javascript" src="js/game/models/safe_tile.js"></script>
+        <script type="text/javascript" src="js/game/models/floor_tile.js"></script>
+        <script type="text/javascript" src="js/game/game.js"></script>
+        <!-- APP -->
     </body>
 </html>

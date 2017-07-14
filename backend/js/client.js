@@ -7,7 +7,7 @@ Client.send = function(key, data) {
 };
 
 Client.onMessage = function(data) {
-  console.log("onMessage", data);
+  console.log("Client.onMessage", data);
   if (data.set_username) {
     Client.username = data.set_username;
     this.onUsernameSet();

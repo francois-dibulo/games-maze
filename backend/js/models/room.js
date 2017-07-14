@@ -1,5 +1,6 @@
-var Room = function(id) {
+var Room = function(id, io) {
   this.id = id;
+  this.io = io;
   this.players = [];
 }
 
@@ -21,7 +22,7 @@ Room.prototype = {
   },
 
   broadcast: function(data) {
-    io.sockets.in(this.id).emit('message', data);
+    this.io.sockets.in(this.id).emit('message', data);
   }
 
 };

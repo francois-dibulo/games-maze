@@ -4,7 +4,7 @@ var app = {
     },
 
     onDeviceReady: function() {
-        initGame();
+        //initGame();
     }
 };
 
@@ -17,3 +17,20 @@ if (window.corodva) {
 document.getElementById('refresh').addEventListener('touchstart', function() {
   location.reload();
 });
+
+// =======================================================================================
+
+var node_iframe = document.getElementById('backend-frame');
+
+// Bind events from Node backend
+window.addEventListener('message',function(event) {
+  console.log("E", event.data);
+});
+
+function loadBackend() {
+  node_iframe.src = "http://localhost:8081";
+}
+
+function postNode(message) {
+  node_iframe.contentWindow.postMessage(message, "*");
+}

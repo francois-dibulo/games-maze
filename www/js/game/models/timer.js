@@ -17,11 +17,10 @@ var Timer = {
   stop: function() {
     this.is_running = false;
   },
-  loop: function() {
-    if (!this.is_running) return;
-    var now = +(new Date());
-    var delta = now - this.start_ts;
-
+  setEleValue: function(value) {
+    this.ele.innerHTML = value;
+  },
+  timeToString: function(delta) {
     var x = delta / 1000;
     var seconds = x % 60;
     x /= 60;
@@ -35,7 +34,14 @@ var Timer = {
     var min_label = Math.floor(minutes);
     if (min_label < 10) { min_label = "0" + min_label; }
 
-    this.ele.innerHTML = min_label + ":" + sec_label + ":" + ms_label;
+    return min_label + ":" + sec_label + ":" + ms_label;
+  },
+  loop: function() {
+    if (!this.is_running) return;
+    var now = +(new Date());
+    var delta = now - this.start_ts;
+    var label = this.timeToString(delta);
+    this.setEleValue(label);
     setTimeout(function() {
       this.loop();
     }.bind(this), 100);
