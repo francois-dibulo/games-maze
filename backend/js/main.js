@@ -28,10 +28,10 @@ window.onload = function() {
 }
 
 Client.onUsernameSet = function() {
-  Client.send('find_game');
   postApp({
     state: 'matching'
   });
+  Client.send('find_game');
 };
 
 Client.onGameStart = function(data) {
@@ -40,4 +40,3 @@ Client.onGameStart = function(data) {
     game_data: data
   });
 };
-

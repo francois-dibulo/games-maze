@@ -4,6 +4,7 @@ App.controllers.controller('GameCtrl', ['$scope', '$location', '$http', '$window
   var node_iframe = null;
 
   $scope.ingame = false;
+  $scope.remote = false;
 
   var State = {
     Connected: 'connected',
@@ -11,7 +12,9 @@ App.controllers.controller('GameCtrl', ['$scope', '$location', '$http', '$window
     Ingame: 'ingame'
   };
 
-  $scope.remote = false;
+  var room_id = null;
+  $scope.opponents = [];
+
   if ($routeParams && $routeParams.type) {
     $scope.remote = $routeParams.type === "remote" ? true : false;
     $scope.remote_path = $scope.remote ? 'views/_game_remote.html' : 'views/_game_local.html';
@@ -23,7 +26,16 @@ App.controllers.controller('GameCtrl', ['$scope', '$location', '$http', '$window
 
   var startGame = function(data) {
     $scope.ingame = true;
-    Game(data);
+    var game = new MazeGame(data);
+    game.onLevelComplete = function() {
+      console.info("Level completed");
+      if ($scope.remote) {
+        postBackend({
+          action: 'on_level_completed',
+          user_id: $scope.player.id
+        });
+      }
+    }
   };
 
   // =====================================================================================
@@ -34,14 +46,12 @@ App.controllers.controller('GameCtrl', ['$scope', '$location', '$http', '$window
     var data = event.data;
     if (data) {
 
-      if (data.start) {
-        startGame(data.maze);
-      }
-
       if (data.state) {
         $scope.state = data.state;
         if (!$scope.ingame && data.state === State.Ingame) {
           console.log(data);
+          $scope.opponents = data.opponents;
+          room_id = data.room_id;
           startGame(data.game_data.maze);
         }
       }
