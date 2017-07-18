@@ -45,6 +45,18 @@ MazeGame.Config = {
   level: 1
 };
 
+MazeGame.prototype.destroy = function() {
+  MazeGame.Config = {
+    Tile_Size: 0,
+    Rows: 19,
+    Cols: 11,
+    MAX_ROWS: 51,
+    level: 1
+  };
+  this.phaser.destroy();
+  this.phaser = null;
+};
+
 MazeGame.prototype.updateLevel = function() {
   var ele = document.getElementById('level');
   ele.innerHTML = "LVL " + MazeGame.Config.level;

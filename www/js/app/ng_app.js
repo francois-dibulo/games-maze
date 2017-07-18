@@ -57,6 +57,12 @@ App.app.config(['$routeProvider',
       when('/game/:type', {
         templateUrl: 'views/game.html',
         controller: 'GameCtrl'
+      }).
+      when('/credits', {
+        templateUrl: 'views/credits.html'
+      }).
+      when('/highscore', {
+        templateUrl: 'views/highscore.html'
       })
     }
 ]);

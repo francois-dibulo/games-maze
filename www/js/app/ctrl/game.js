@@ -3,6 +3,8 @@ App.controllers.controller('GameCtrl', ['$scope', '$location', '$http', '$window
   var REMOTE_BASE_URL = "http://localhost:8081";
   var node_iframe = null;
 
+  var game_instance = null;
+
   $scope.ingame = false;
   $scope.remote = false;
 
@@ -26,8 +28,8 @@ App.controllers.controller('GameCtrl', ['$scope', '$location', '$http', '$window
 
   var startGame = function(data) {
     $scope.ingame = true;
-    var game = new MazeGame(data);
-    game.onLevelComplete = function() {
+    game_instance = new MazeGame(data);
+    game_instance.onLevelComplete = function() {
       console.info("Level completed");
       if ($scope.remote) {
         postBackend({
@@ -100,5 +102,12 @@ App.controllers.controller('GameCtrl', ['$scope', '$location', '$http', '$window
       startGame();
     }
   };
+
+  $scope.$on('$destroy', function() {
+    if (game_instance) {
+      game_instance.destroy();
+      game_instance = null;
+    }
+  });
 
 }]);

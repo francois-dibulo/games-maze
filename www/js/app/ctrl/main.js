@@ -2,7 +2,13 @@ App.controllers.controller('MainCtrl', ['$scope', '$location', '$http', function
 
   $scope.player = {
     id: null,
-    username: null
+    username: null,
+    online: navigator.onLine
+  };
+
+  $scope.isOffline = function() {
+    $scope.player.online = navigator.onLine;
+    return navigator.onLine;
   };
 
   $scope.init = function() {

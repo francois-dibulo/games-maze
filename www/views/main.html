@@ -1,5 +1,18 @@
-Main
-<br>
-<a href="#/game/local">Game Local</a>
-<br>
-<a href="#/game/remote">Game Remote</a>
+<div class="flex-h half-height">
+  <a href="#/game/local" class="btn full-height flex-v">
+    Start Race
+  </a>
+  <a href="#/game/remote" class="btn full-height flex-v" ng-class="{ disabled: !isOffline() }">
+    Multiplayer
+    <div class="btn-sublabel" ng-show="!player.online">(You seem to be offline)</div>
+  </a>
+</div>
+
+<div class="flex-h half-height">
+  <a href="#/highscore" class="btn full-height flex-v">
+    Highscore
+  </a>
+  <a href="#/credits" class="btn full-height flex-v">
+    Info
+  </a>
+</div>

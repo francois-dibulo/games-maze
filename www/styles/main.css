@@ -10,26 +10,83 @@ body {
   background: #000000;
   color: #FFFFFF;
   font-family: 'Exo', sans-serif;
-  /*font-family: 'Orbitron', sans-serif;*/
+  font-size: 18px;
 }
 
-#refresh {
-  width: 44px;
-  height: 44px;
-  position: absolute;
-  left: 50%;
-  top: 0;
-  margin-left: -22px;
-  background-color: rgba(255, 255, 255, 0.2);
-  background-image: url('../assets/refresh.png');
-  background-repeat: no-repeat;
-  background-size: 50%;
-  background-position: center;
-  border-bottom-left-radius: 100%;
-  border-bottom-right-radius: 100%;
-  border: 2px solid #444444;
-  box-sizing: border-box;
+/*
+  MAIN
+*/
+
+a, a:visited {
+  color: #FFFFFF;
+  text-decoration: none;
 }
+
+.full-height {
+  display: block;
+  height: 100%;
+}
+
+.half-height {
+  display: block;
+  height: 50%;
+}
+
+.flex-h, .flex-h-sb, .flex-v {
+  display: flex;
+  align-items: center;
+  flex-wrap: nowrap;
+}
+
+.flex-h {
+  flex-direction: row;
+  justify-content: space-around;
+}
+
+.flex-h-sb {
+  flex-direction: row;
+  justify-content: space-between;
+}
+
+.flex-v {
+  flex-direction: column;
+  justify-content: center;
+}
+
+.btn {
+  width: 100%;
+  align-self: center;
+  text-align: center;
+  background: #292929;
+  box-sizing: border-box;
+  border: 1px solid #333333;
+  font-size: 1.2em;
+  cursor: pointer;
+}
+
+.disabled {
+  opacity: 0.5;
+}
+
+.btn-sublabel {
+  display: block;
+  font-size: 0.8em;
+}
+
+/*
+  TOP
+*/
+.top-bar {
+  background: #222222;
+}
+
+.top-bar-content {
+  padding: 0.8em 0.5em;
+}
+
+/*
+  GAME
+*/
 
 #swipe-area {
   position: absolute;

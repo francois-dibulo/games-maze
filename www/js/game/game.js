@@ -24,5 +24,6 @@ Game.prototype = {
   },
 
   create: function() {},
-  update: function() {}
+  update: function() {},
+  destroy: function() {}
 };
