@@ -1,7 +1,12 @@
+if (require) {
+  MazeHandler = require('./maze_handler');
+}
+
 var Room = function(id, io) {
   this.id = id;
   this.io = io;
   this.players = [];
+  this.maze_handler = new MazeHandler();
 }
 
 Room.prototype = {

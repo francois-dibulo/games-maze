@@ -32,6 +32,19 @@ window.onload = function() {
   });
 }
 
+Client.onUpdate = function(data) {
+  if (data.sub_action === "next_level") {
+    postApp({
+      action: 'next_level',
+      data: data
+    });
+  } else if (data.sub_action === "update_opponents") {
+    postApp({
+      opponents: data.opponents
+    });
+  }
+}
+
 Client.onUsernameSet = function(data) {
   postApp({
     state: 'matching',

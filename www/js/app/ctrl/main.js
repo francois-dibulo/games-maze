@@ -3,7 +3,8 @@ App.controllers.controller('MainCtrl', ['$scope', '$location', '$http', function
   $scope.player = {
     id: null,
     username: null,
-    online: navigator.onLine
+    online: navigator.onLine,
+    level: 0
   };
 
   $scope.isOffline = function() {

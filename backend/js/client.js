@@ -16,6 +16,10 @@ Client.onMessage = function(data) {
   if (data.view === 'game') {
     this.onGameStart(data);
   }
+
+  if (data.action === 'update') {
+    this.onUpdate(data);
+  }
 };
 
 Client.setUsername = function(username) {
@@ -24,6 +28,10 @@ Client.setUsername = function(username) {
 
 // Abstract functions
 Client.onUsernameSet = function() {
+  throw "Implement me";
+};
+
+Client.onUpdate = function() {
   throw "Implement me";
 };
 

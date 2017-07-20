@@ -52,8 +52,6 @@ function getPlayerByUsername(username) {
 
 function getMatchingOpponents(player_id, limit) {
   var opponents = [];
-  console.log("============================================");
-  console.log("id", player_id);
   for (var id in players) {
     if (id === player_id) continue;
     if (opponents.length >= limit) break;
@@ -98,7 +96,27 @@ io.on('connection', function(socket) {
   });
 
   socket.on('on_level_completed', function (data) {
-    console.log("Player " + player.username + " completed level");
+    var room = rooms[player.current_room_id];
+    var maze = room.maze_handler.getMaze(++player.current_level.index);
+
+    player.send({
+      action: 'update',
+      sub_action: 'next_level',
+      maze: maze,
+      level: player.current_level
+    });
+
+    var opponents = [];
+    for (var i = 0; i < room.players.length; i++) {
+      var p_id = room.players[i];
+      var player_obj = getPlayerByKeyValue('id', p_id);
+      opponents.push(player_obj.toJson());
+    }
+    room.broadcast({
+      action: "update",
+      sub_action: "update_opponents",
+      opponents: opponents
+    });
   });
 
   socket.on('find_game', function(data) {
@@ -109,6 +127,7 @@ io.on('connection', function(socket) {
     opponents.push(player);
 
     var client_opponents = [];
+    var level_index = 0;
 
     var room = createRoom();
     for (var i = 0; i < opponents.length; i++) {
@@ -116,24 +135,17 @@ io.on('connection', function(socket) {
       room.addPlayer(p.id);
       p.joinRoom(room.id);
       p.setState(Player.State.Ingame);
+      p.current_level.index = level_index;
       client_opponents.push(p.toJson());
     }
 
-    var rows = 19;
-    var cols = 11;
-    var maze = new Maze(rows, cols);
+    room.maze_handler.create(5);
 
     room.broadcast({
       view: 'game',
       opponents: client_opponents,
       room_id: room.id,
-      maze: {
-        rows: rows,
-        cols: cols,
-        maze: maze.maze,
-        mazeEnd: maze.mazeEnd,
-        mazeStart: maze.mazeStart,
-      }
+      maze: room.maze_handler.getMaze(level_index)
     });
 
   });

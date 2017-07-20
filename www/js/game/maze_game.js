@@ -45,6 +45,12 @@ MazeGame.Config = {
   level: 1
 };
 
+MazeGame.prototype.setConfig = function(opts) {
+  MazeGame.Config.Rows = opts.rows || 19;
+  MazeGame.Config.Cols = opts.cols || 11;
+  this.maze_opts = opts;
+};
+
 MazeGame.prototype.destroy = function() {
   MazeGame.Config = {
     Tile_Size: 0,
@@ -57,16 +63,15 @@ MazeGame.prototype.destroy = function() {
   this.phaser = null;
 };
 
-MazeGame.prototype.updateLevel = function() {
-  var ele = document.getElementById('level');
-  ele.innerHTML = "LVL " + MazeGame.Config.level;
-};
-
 MazeGame.prototype.create = function() {
   Timer.init();
   this.buildSwipeArea();
-  this.renderMaze();
+  this.onReady();
 };
+
+MazeGame.prototype.onReady = function() {
+  return;
+}
 
 MazeGame.prototype.setCustomData = function(tile, tile_size) {
   var col = Math.floor(tile.x / tile_size);
@@ -79,6 +84,7 @@ MazeGame.prototype.setCustomData = function(tile, tile_size) {
 
 MazeGame.prototype.renderMaze = function() {
   var game = this.phaser;
+  console.log("render maze", game, this.phaser)
   var rows = MazeGame.Config.Rows;
   var cols = MazeGame.Config.Cols;
   this.grid = [];
@@ -155,18 +161,19 @@ MazeGame.prototype.renderMaze = function() {
 
   Timer.reset();
   Timer.start();
-  this.updateLevel();
 };
 
 MazeGame.prototype.loadNextLevel = function() {
   this.onLevelComplete(MazeGame.Config.level);
   this.lock_swipe = false;
-  if (MazeGame.Config.Rows < MazeGame.Config.MAX_ROWS) {
-    MazeGame.Config.Rows += 2;
-    MazeGame.Config.Cols += 2;
+  if (this.maze_opts) {
+    if (MazeGame.Config.Rows < MazeGame.Config.MAX_ROWS) {
+      MazeGame.Config.Rows += 2;
+      MazeGame.Config.Cols += 2;
+    }
+    MazeGame.Config.level++;
+    this.renderMaze();
   }
-  MazeGame.Config.level++;
-  this.renderMaze();
 };
 
 MazeGame.prototype.resetLevel = function() {

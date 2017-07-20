@@ -28,16 +28,23 @@ App.controllers.controller('GameCtrl', ['$scope', '$location', '$http', '$window
 
   var startGame = function(data) {
     $scope.ingame = true;
-    game_instance = new MazeGame(data);
+    game_instance = new MazeGame();
+
+    game_instance.onReady = function() {
+      game_instance.setConfig(data);
+      game_instance.renderMaze();
+    };
+
     game_instance.onLevelComplete = function() {
-      console.info("Level completed", $scope.remote);
+      console.info("Level completed");
       if ($scope.remote) {
         postBackend({
           action: 'on_level_completed',
           user_id: $scope.player.id
         });
       }
-    }
+    };
+
   };
 
   // =====================================================================================
@@ -50,18 +57,26 @@ App.controllers.controller('GameCtrl', ['$scope', '$location', '$http', '$window
 
       if (data.client_id) {
         $scope.player.id = data.client_id;
-        console.log(data.client_id);
       }
 
       if (data.state) {
         $scope.state = data.state;
         if (!$scope.ingame && data.state === State.Ingame) {
-          console.log(data);
           var game_data = data.game_data;
           $scope.opponents = game_data.opponents;
           room_id = data.room_id;
           startGame(game_data.maze);
         }
+      }
+
+      if (data.action === 'next_level' && game_instance) {
+        game_instance.setConfig(data.data.maze);
+        game_instance.renderMaze();
+        $scope.player.level = data.data.level.index;
+      }
+
+      if (data.opponents) {
+        $scope.opponents = data.opponents;
       }
 
       $scope.$apply();
