@@ -10,7 +10,7 @@ Client.onMessage = function(data) {
   console.log("Client.onMessage", data);
   if (data.set_username) {
     Client.username = data.set_username;
-    this.onUsernameSet();
+    this.onUsernameSet(data);
   }
 
   if (data.view === 'game') {

@@ -115,3 +115,20 @@ a, a:visited {
   font-size: 5vh;
   color: #FFFFFF;
 }
+
+.opponents {
+  position: absolute;
+  top: 0;
+  left: 0;
+  margin: 0;
+  list-style-type: none;
+  padding: 0;
+}
+
+.partial {
+  height: 100%;
+  width: 100%;
+  position: absolute;
+  top: 0;
+  left: 0;
+}

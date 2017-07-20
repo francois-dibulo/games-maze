@@ -1,7 +1,3 @@
-Remote Game
-
-{{ state }}
-
 <div ng-switch="state">
 
   <div ng-switch-when="connected">
@@ -15,7 +11,11 @@ Remote Game
   </div>
 
   <div ng-switch-when="ingame">
-    Ingame
+    <ul class="opponents">
+      <li ng-repeat="opponent in opponents | filter:{ id: '!' + player.id }">
+        {{ opponent.username }} (LVL {{ opponent.current_level.index + 1 }})
+      </li>
+    </ul>
   </div>
 
   <div ng-switch-default>
@@ -23,5 +23,7 @@ Remote Game
   </div>
 
 </div>
+
+
 
 <iframe src="" id="backend-frame" height="0" width="0" frameborder="0"></iframe>

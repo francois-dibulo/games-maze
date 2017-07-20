@@ -17,6 +17,11 @@ window.addEventListener('message',function(event) {
     if (data.set_username) {
       joinGame(data.username);
     }
+
+    if (data.action === 'on_level_completed') {
+      Client.send('on_level_completed');
+    }
+
   }
 
 });
@@ -27,9 +32,10 @@ window.onload = function() {
   });
 }
 
-Client.onUsernameSet = function() {
+Client.onUsernameSet = function(data) {
   postApp({
-    state: 'matching'
+    state: 'matching',
+    client_id: data.client_id
   });
   Client.send('find_game');
 };

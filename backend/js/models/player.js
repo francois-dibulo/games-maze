@@ -4,6 +4,11 @@ var Player = function(socket) {
   this.username = null;
   this.state = Player.State.Connected;
   this.current_room_id = null;
+  this.current_level = {
+    index: 0,
+    start_ts: null,
+    end_ts: null
+  };
 }
 
 Player.State = {
@@ -38,8 +43,9 @@ Player.prototype = {
   toJson: function() {
     return {
       id: this.id,
-      username: this.username
-    }
+      username: this.username,
+      current_level: this.current_level
+    };
   }
 
 };

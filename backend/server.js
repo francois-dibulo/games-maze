@@ -91,9 +91,14 @@ io.on('connection', function(socket) {
     var player = players[socket.id];
     player.username = data.username;
     player.send({
-      set_username: player.username
+      set_username: player.username,
+      client_id: player.id
     });
     player.setState(Player.State.Connected);
+  });
+
+  socket.on('on_level_completed', function (data) {
+    console.log("Player " + player.username + " completed level");
   });
 
   socket.on('find_game', function(data) {
@@ -104,9 +109,6 @@ io.on('connection', function(socket) {
     opponents.push(player);
 
     var client_opponents = [];
-    for (var i = 0; i < opponents.length; i++) {
-      client_opponents.push(opponents[i].toJson());
-    }
 
     var room = createRoom();
     for (var i = 0; i < opponents.length; i++) {
@@ -114,6 +116,7 @@ io.on('connection', function(socket) {
       room.addPlayer(p.id);
       p.joinRoom(room.id);
       p.setState(Player.State.Ingame);
+      client_opponents.push(p.toJson());
     }
 
     var rows = 19;
